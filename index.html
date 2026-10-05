@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMT Production Management System</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f6f9;color:#222}
+.sidebar{position:fixed;left:0;top:0;width:240px;height:100vh;background:#172033;color:white;padding:20px 12px}
+.sidebar h2{margin:0 8px 20px;font-size:20px}
+.menu{padding:13px 15px;margin:5px 0;border-radius:7px;cursor:pointer}
+.menu:hover,.menu.active{background:#2d6cdf}
+.main{margin-left:240px;padding:25px}
+.header{background:white;padding:20px;border-radius:10px;margin-bottom:18px}
+.header h1{margin:0 0 5px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:18px}
+.card{background:white;padding:18px;border-radius:10px;box-shadow:0 1px 5px #ddd}
+.card h3{margin:0 0 10px;font-size:14px;color:#666}.card p{margin:0;font-size:24px;font-weight:bold}
+.section{background:white;padding:20px;border-radius:10px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:5px}
+.field input,.field select,.field textarea{padding:8px;border:1px solid #ccc;border-radius:5px}
+button{border:0;border-radius:6px;padding:9px 14px;cursor:pointer;font-weight:bold}
+.primary{background:#2563eb;color:white}.success{background:#159447;color:white}.danger{background:#dc2626;color:white}.gray{background:#6b7280;color:white}
+.table-wrap{overflow-x:auto;border:1px solid #ddd}
+table{border-collapse:collapse;min-width:2200px;width:100%}
+th,td{border:1px solid #d1d5db;padding:7px;text-align:center;white-space:nowrap}
+th{background:#1f2937;color:white;font-size:12px}
+td input{width:70px;padding:6px;border:1px solid #bbb;border-radius:4px}
+td .down{width:52px;background:#fff7ed;border-color:#fb923c}
+.stage-cell{font-weight:bold;background:#f3f4f6}
+.report-table{min-width:1100px}
+.small{font-size:12px;color:#666}
+.empty{padding:30px;text-align:center;color:#777}
+@media(max-width:900px){.sidebar{width:190px}.main{margin-left:190px}.cards{grid-template-columns:repeat(2,1fr)}}
+
+.dt-form{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}.dt-form .full{grid-column:1/-1}.dt-form label{font-weight:700;font-size:13px}.dt-form input,.dt-form select,.dt-form textarea{width:100%;box-sizing:border-box;margin-top:6px;padding:9px;border:1px solid #cbd5e1;border-radius:7px}.dt-form textarea{min-height:55px;resize:vertical}.dt-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.dt-table-wrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.dt-table{border-collapse:collapse;width:100%;min-width:1500px}.dt-table th,.dt-table td{border:1px solid #dbe2ea;padding:8px;font-size:12px;vertical-align:top}.dt-table th{background:#eef3f8;white-space:nowrap}.dt-table td{white-space:normal}.dt-btn{border:0;border-radius:7px;padding:8px 12px;cursor:pointer;font-weight:700}.dt-save{background:#2563eb;color:#fff}.dt-view{background:#0f766e;color:#fff}.dt-excel{background:#15803d;color:#fff}.dt-delete{background:#dc2626;color:#fff}.dt-clear{background:#64748b;color:#fff}.dt-datebar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;background:#fff;padding:14px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}.dt-datebar label{font-weight:700;font-size:13px}.dt-datebar input{display:block;margin-top:6px;padding:9px;border:1px solid #cbd5e1;border-radius:7px}.dt-min{font-weight:700;color:#b45309}.dt-empty{padding:20px;text-align:center;color:#64748b}
+.oee-form{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}.oee-form label{font-weight:700;font-size:13px}.oee-form input,.oee-form select{width:100%;margin-top:6px;padding:9px;border:1px solid #cbd5e1;border-radius:7px}.oee-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.oee-table-wrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.oee-table{border-collapse:collapse;width:100%;min-width:1900px}.oee-table th,.oee-table td{border:1px solid #dbe2ea;padding:8px;font-size:12px;white-space:nowrap}.oee-table th{background:#1f2937;color:#fff}.oee-kpi{font-weight:700}.oee-good{color:#15803d;font-weight:700}.oee-datebar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;background:#fff;padding:14px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}.oee-datebar label{font-weight:700;font-size:13px}.oee-datebar input{display:block;margin-top:6px;padding:9px;border:1px solid #cbd5e1;border-radius:7px}.dash-line-wrap{overflow:auto;margin-top:18px}.dash-line{min-width:1000px}
+.kpi-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.kpi-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}.kpi-excel{background:#15803d;color:#fff;border:0;border-radius:6px;padding:9px 14px;cursor:pointer;font-weight:700}.kpi-table-wrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.kpi-table{border-collapse:collapse;width:100%;min-width:800px}.kpi-table th,.kpi-table td{border:1px solid #dbe2ea;padding:9px;text-align:center}.kpi-table th{background:#1f2937;color:#fff}.kpi-table td input{width:100%;min-width:120px;padding:8px;border:1px solid #cbd5e1;border-radius:6px}
+.pm-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:16px}.pm-field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}.pm-field input,.pm-field select,.pm-field textarea{padding:8px;border:1px solid #cbd5e1;border-radius:6px}.pm-form{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px;background:#f8fafc;padding:15px;border-radius:10px;margin-bottom:15px}.pm-form .full{grid-column:1/-1}.pm-form textarea{width:100%;min-height:55px}.pm-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.pm-btn{padding:9px 13px;border-radius:6px;border:0;cursor:pointer;font-weight:700}.pm-blue{background:#2563eb;color:#fff}.pm-green{background:#15803d;color:#fff}.pm-red{background:#dc2626;color:#fff}.pm-gray{background:#64748b;color:#fff}.pm-orange{background:#ea580c;color:#fff}.pm-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:15px 0}.pm-kpi{background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:13px;text-align:center}.pm-kpi b{display:block;font-size:22px;margin-top:5px}.pm-table-wrap,.pm-cal-wrap{overflow:auto;border:1px solid #dbe2ea;border-radius:8px;margin-top:12px}.pm-table{min-width:1500px;border-collapse:collapse;width:100%}.pm-table th,.pm-table td{border:1px solid #dbe2ea;padding:7px;text-align:center;white-space:nowrap}.pm-table th{background:#1f2937;color:#fff}.pm-status{font-weight:700}.pm-calendar{min-width:1000px;border-collapse:collapse;width:100%}.pm-calendar th,.pm-calendar td{border:1px solid #dbe2ea;padding:7px;text-align:center;vertical-align:top}.pm-calendar th{background:#1f2937;color:#fff}.pm-cal-eq{text-align:left;font-weight:700;background:#f8fafc}.pm-day{min-width:34px;height:38px}.pm-check{display:inline-block;background:#dcfce7;color:#166534;border-radius:50%;width:23px;height:23px;line-height:23px;font-weight:800}.pm-due{display:inline-block;background:#fef3c7;color:#92400e;border-radius:4px;padding:3px;font-size:11px}.pm-empty{padding:20px;text-align:center;color:#64748b}@media(max-width:1000px){.pm-form{grid-template-columns:repeat(2,minmax(160px,1fr))}.pm-kpis{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+<h2>SMT Production</h2>
+<div class="menu active" onclick="showDashboard()">Dashboard</div>
+<div class="menu" onclick="openProduction()">Production</div>
+<div class="menu" onclick="openDowntime()">Downtime</div>
+<div class="menu" onclick="openOEE()">OEE & Reliability</div>
+<div class="menu" onclick="openKPI()">KPI</div>
+<div class="menu" onclick="openPMSchedule()">PM Schedule</div>
+<div class="menu" onclick="alert('Reports module')">Reports</div>
+<div class="menu" onclick="alert('Master Data module')">Master Data</div>
+<div class="menu" onclick="alert('Settings module')">Settings</div>
+</div>
+
+<div class="main">
+<div class="header">
+<h1 id="title">Dashboard</h1>
+<p id="subtitle">SMT Production Management System</p>
+</div>
+<div class="cards" id="cards">
+<div class="card"><h3>Today's Target</h3><p id="dashTarget">0</p></div>
+<div class="card"><h3>Today's Output</h3><p id="dashOutput">0</p></div>
+<div class="card"><h3>Achievement</h3><p id="dashAch">0%</p></div>
+<div class="card"><h3>Downtime</h3><p id="dashDown">0 Min</p></div>
+</div>
+<div class="section" id="content"><h2>Dashboard</h2><p class="small">Select Production from the left menu.</p></div>
+</div>
+
+<script>
+const KEY='smtProductionRecords_v2';
+const stagesDefault=['SPI','Printer','Mounter','Reflow','AOI','Router'];
+let stages=[...stagesDefault];
+
+function getRecords(){return JSON.parse(localStorage.getItem(KEY)||'[]')}
+function setRecords(x){localStorage.setItem(KEY,JSON.stringify(x))}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function today(){return new Date().toISOString().slice(0,10)}
+function setActive(name){
+ document.querySelectorAll('.menu').forEach(x=>x.classList.remove('active'));
+ [...document.querySelectorAll('.menu')].find(x=>x.textContent.trim()===name)?.classList.add('active');
+}
+function showDashboard(){
+ setActive('Dashboard'); document.getElementById('title').textContent='Dashboard';
+ document.getElementById('subtitle').textContent='SMT Production Management System';
+ renderDashboard();
+}
+function renderDashboard(){
+ const rec=getRecords(), d=today(), rows=rec.filter(x=>x.date===d);
+ let out=0,target=0,down=0;
+ rows.forEach(r=>{target+=Number(r.target)||0; r.hours.forEach(h=>{out+=Number(h.output)||0;down+=Number(h.down)||0})});
+ document.getElementById('dashTarget').textContent=target;
+ document.getElementById('dashOutput').textContent=out;
+ document.getElementById('dashAch').textContent=(target?((out/target)*100).toFixed(1):0)+'%';
+ document.getElementById('dashDown').textContent=down+' Min';
+ const oee=getOEERecords().filter(x=>x.date===d);let byLine={};oee.forEach(x=>{const r=oeeCalc(x);if(!byLine[x.line])byLine[x.line]={out:0,down:0,target:0,ok:0,ng:0,planned:0,operating:0};let b=byLine[x.line];b.out+=r.out;b.down+=r.down;b.target+=r.target;b.ok+=r.ok;b.ng+=r.ng;b.planned+=r.planned;b.operating+=r.operating});let lh='<div class="dash-line-wrap"><table class="dash-line"><thead><tr><th>Line</th><th>Production</th><th>Downtime (Min)</th><th>Target</th><th>Achievement %</th><th>Availability %</th><th>Performance %</th><th>Quality %</th><th>OEE %</th></tr></thead><tbody>';Object.keys(byLine).sort().forEach(line=>{let b=byLine[line],a=b.planned?b.operating/b.planned*100:0,p=b.target?b.out/b.target*100:0,q=b.out?b.ok/b.out*100:0,oe=a*p*q/10000;lh+=`<tr><td>${esc(line)}</td><td>${b.out}</td><td>${b.down}</td><td>${b.target}</td><td>${oeeNum(p)}%</td><td>${oeeNum(a)}%</td><td>${oeeNum(p)}%</td><td>${oeeNum(q)}%</td><td class="oee-good">${oeeNum(oe)}%</td></tr>`});lh+='</tbody></table></div>';document.getElementById('content').innerHTML='<h2>Dashboard</h2><p class="small">Today line-wise Production + Downtime + OEE</p>'+lh;
+}
+function openProduction(){
+ setActive('Production'); document.getElementById('title').textContent='Production';
+ document.getElementById('subtitle').textContent='Daily / Hourly Production Output';
+ document.getElementById('cards').innerHTML=`
+ <div class="card"><h3>Selected Date</h3><p id="cDate">-</p></div>
+ <div class="card"><h3>Total Output</h3><p id="cOut">0</p></div>
+ <div class="card"><h3>UPH Achieved</h3><p id="cUPH">0</p></div>
+ <div class="card"><h3>Total Down</h3><p id="cDown">0 Min</p></div>`;
+ productionPage();
+}
+function productionPage(){
+ document.getElementById('content').innerHTML=`
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+  <button class="primary" onclick="openDaily()">1. Daily / Hourly Production Output</button>
+  <button class="gray" onclick="openRangeReport('Weekly')">2. Weekly Report</button>
+  <button class="gray" onclick="openRangeReport('Monthly')">3. Monthly Report</button>
+ </div>
+ <div id="prodArea"></div>`;
+ openDaily();
+}
+function openDaily(){
+ document.getElementById('prodArea').innerHTML=`
+ <h2>Daily / Hourly Production Output</h2>
+ <div class="toolbar">
+  <div class="field"><label>Running Date</label><input type="date" id="pDate" value="${today()}" onchange="loadDateData()"></div>
+  <div class="field"><label>Work Order</label><input id="wo" placeholder="Work Order"></div>
+  <div class="field"><label>Run Card</label><input id="run" placeholder="Run Card"></div>
+  <div class="field"><label>Model</label><input id="model" placeholder="Model"></div>
+  <div class="field"><label>Line</label><select id="line"><option>Line-01</option><option>Line-02</option><option>Line-03</option><option>Line-04</option><option>Line-05</option><option>Line-06</option></select></div>
+  <button class="primary" onclick="addStage()">+ Add Stage</button>
+  <button class="danger" onclick="deleteSelectedStage()">Delete Stage</button>
+  <button class="success" onclick="saveProduction()">Save</button>
+ </div>
+ <p class="small">Each hourly box has Output and Down Min. Saved records are separated by date.</p>
+ <div class="table-wrap"><table><thead><tr>
+ <th>Stages</th><th>UPH Target</th>
+ ${['8-9','9-10','10-11','11-12','12-1','1-2','2-3','3-4','4-5','5-6'].map(x=>`<th>${x}<br>Output / Down Min</th>`).join('')}
+ <th>Total Output</th><th>Total Machine Down</th><th>Total Material Down</th><th>UPH Achieved</th><th>Remarks</th>
+ </tr></thead><tbody id="stageBody"></tbody></table></div>`;
+ renderStageRows(); loadDateData();
+}
+function renderStageRows(savedRows=[]){
+ const body=document.getElementById('stageBody'); if(!body)return;
+ body.innerHTML=stages.map((s,i)=>{
+  const r=savedRows.find(x=>x.stage===s)||{};
+  const hours=r.hours||Array.from({length:10},()=>({output:'',down:''}));
+  return `<tr data-stage="${esc(s)}">
+   <td class="stage-cell"><input type="radio" name="stagePick" value="${esc(s)}" ${i===0?'checked':''}> ${esc(s)}</td>
+   <td><input class="target" type="number" min="0" value="${esc(r.target||'')}"></td>
+   ${hours.map((h,j)=>`<td><input class="out h${j}" type="number" min="0" value="${esc(h.output||'')}" oninput="calcRow(this)"><br><input class="down d${j}" type="number" min="0" value="${esc(h.down||'')}" placeholder="Down Min" oninput="calcRow(this)"></td>`).join('')}
+   <td><input class="total" readonly value="${sum(hours,'output')}"></td>
+   <td><input class="machine" readonly value="${sum(hours,'down')}"></td>
+   <td><input class="material" type="number" min="0" value="${esc(r.material||'')}"></td>
+   <td><input class="uph" readonly value="${hours.filter(h=>h.output!==''&&h.output!=null).length? (Number(sum(hours,'output'))/hours.filter(h=>h.output!==''&&h.output!=null).length).toFixed(2):'0'}"></td>
+   <td><input class="remarks" value="${esc(r.remarks||'')}"></td>
+  </tr>`;
+ }).join('');
+ updateCards();
+}
+function sum(hours,key){return hours.reduce((a,h)=>a+(Number(h[key])||0),0)}
+function calcRow(el){
+ const tr=el.closest('tr'), outs=[...tr.querySelectorAll('.out')].map(x=>Number(x.value)||0);
+ const downs=[...tr.querySelectorAll('.down')].map(x=>Number(x.value)||0);
+ const count=[...tr.querySelectorAll('.out')].filter(x=>x.value!=='').length;
+ tr.querySelector('.total').value=outs.reduce((a,b)=>a+b,0);
+ tr.querySelector('.machine').value=downs.reduce((a,b)=>a+b,0);
+ tr.querySelector('.uph').value=count?(outs.reduce((a,b)=>a+b,0)/count).toFixed(2):'0';
+ updateCards();
+}
+function addStage(){
+ const n=prompt('Enter Stage Name:'); if(!n||!n.trim())return;
+ const name=n.trim(); if(stages.includes(name)){alert('Stage already exists');return}
+ stages.push(name); renderStageRows();
+}
+function deleteSelectedStage(){
+ const el=document.querySelector('input[name="stagePick"]:checked');
+ if(!el)return alert('Select a stage first');
+ if(!confirm('Delete stage '+el.value+'?'))return;
+ stages=stages.filter(x=>x!==el.value); renderStageRows();
+}
+function collectRows(){
+ return [...document.querySelectorAll('#stageBody tr')].map(tr=>({
+  stage:tr.dataset.stage,target:tr.querySelector('.target').value,
+  hours:[...Array(10)].map((_,j)=>({output:tr.querySelector('.h'+j).value,down:tr.querySelector('.d'+j).value})),
+  material:tr.querySelector('.material').value,remarks:tr.querySelector('.remarks').value
+ }));
+}
+function saveProduction(){
+ const date=document.getElementById('pDate').value; if(!date)return alert('Select date');
+ const rec=getRecords().filter(r=>!(r.date===date&&r.wo===document.getElementById('wo').value&&r.run===document.getElementById('run').value&&r.model===document.getElementById('model').value&&r.line===document.getElementById('line').value));
+ rec.push({date,wo:document.getElementById('wo').value,run:document.getElementById('run').value,model:document.getElementById('model').value,line:document.getElementById('line').value,rows:collectRows(),savedAt:new Date().toISOString()});
+ setRecords(rec); alert('Production data saved successfully'); updateCards();
+}
+function loadDateData(){
+ const date=document.getElementById('pDate').value;
+ const rows=getRecords().filter(r=>r.date===date);
+ const r=rows[0];
+ document.getElementById('cDate').textContent=date;
+ if(r){
+  document.getElementById('wo').value=r.wo||'';document.getElementById('run').value=r.run||'';
+  document.getElementById('model').value=r.model||'';document.getElementById('line').value=r.line||'Line-01';
+  stages=[...new Set(r.rows.map(x=>x.stage))]; renderStageRows(r.rows);
+ }else{renderStageRows()}
+}
+function updateCards(){
+ const rows=[...document.querySelectorAll('#stageBody tr')];let out=0,down=0,hrs=0;
+ rows.forEach(tr=>{out+=Number(tr.querySelector('.total').value)||0;down+=Number(tr.querySelector('.machine').value)||0;hrs+= [...tr.querySelectorAll('.out')].filter(x=>x.value!=='').length});
+ document.getElementById('cOut').textContent=out;document.getElementById('cDown').textContent=down+' Min';document.getElementById('cUPH').textContent=hrs?(out/hrs).toFixed(2):'0';document.getElementById('cDate').textContent=document.getElementById('pDate')?.value||'-';
+}
+function openRangeReport(type){
+ document.getElementById('prodArea').innerHTML=`
+ <h2>${type} Report</h2>
+ <div class="toolbar">
+  <div class="field"><label>Start Date</label><input type="date" id="rStart"></div>
+  <div class="field"><label>End Date</label><input type="date" id="rEnd"></div>
+  <button class="primary" onclick="showRangeReport('${type}')">View Report</button>
+  <button class="success" onclick="exportReport()">Excel Export</button>
+  <button class="gray" onclick="clearReportView()">Clear View</button>
+ </div>
+ <div id="reportArea"><div class="empty">Select Start Date and End Date.</div></div>`;
+}
+function showRangeReport(type){
+ const s=document.getElementById('rStart').value,e=document.getElementById('rEnd').value;
+ if(!s||!e)return alert('Select Start Date and End Date');
+ const rows=getRecords().filter(r=>r.date>=s&&r.date<=e);
+ let html=`<h3>${type}: ${s} to ${e}</h3>`;
+ if(!rows.length){document.getElementById('reportArea').innerHTML=html+'<div class="empty">No saved production data for selected dates.</div>';return}
+ html+=`<div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Work Order</th><th>Run Card</th><th>Model</th><th>Line</th><th>Stage</th><th>Total Output</th><th>Total Down Min</th><th>UPH Achieved</th><th>Remarks</th></tr></thead><tbody>`;
+ rows.forEach(r=>r.rows.forEach(x=>{
+  const out=sum(x.hours,'output'),down=sum(x.hours,'down'),count=x.hours.filter(h=>h.output!=='').length;
+  html+=`<tr><td>${esc(r.date)}</td><td>${esc(r.wo)}</td><td>${esc(r.run)}</td><td>${esc(r.model)}</td><td>${esc(r.line)}</td><td>${esc(x.stage)}</td><td>${out}</td><td>${down}</td><td>${count?(out/count).toFixed(2):0}</td><td>${esc(x.remarks)}</td></tr>`;
+ }));
+ html+='</tbody></table></div>';
+ document.getElementById('reportArea').innerHTML=html;
+ window.currentReportRows=rows;
+}
+function clearReportView(){
+ const area=document.getElementById('reportArea');
+ if(area) area.innerHTML='<div class="empty">Select Start Date and End Date, then click View Report.</div>';
+ window.currentReportRows=[];
+}
+
+function exportReport(){
+ const rows=window.currentReportRows||[];
+ if(!rows.length)return alert('View a report first');
+ let csv='Date,Work Order,Run Card,Model,Line,Stage,Total Output,Total Down Min,UPH Achieved,Remarks\n';
+ rows.forEach(r=>r.rows.forEach(x=>{
+  const out=sum(x.hours,'output'),down=sum(x.hours,'down'),count=x.hours.filter(h=>h.output!=='').length;
+  const vals=[r.date,r.wo,r.run,r.model,r.line,x.stage,out,down,count?(out/count).toFixed(2):0,x.remarks].map(v=>`"${String(v??'').replace(/"/g,'""')}"`);
+  csv+=vals.join(',')+'\\n';
+ }));
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SMT_Production_Report.csv';a.click();URL.revokeObjectURL(a.href);
+}
+function getOEERecords(){try{return JSON.parse(localStorage.getItem('smtOEERecords_v1')||'[]')}catch(e){return []}}
+function setOEERecords(a){localStorage.setItem('smtOEERecords_v1',JSON.stringify(a))}
+function oeeCalc(r){
+ const planned=Number(r.planned)||0, down=Number(r.downtime)||0, operating=Math.max(0,planned-down), target=Number(r.target)||0, out=Number(r.totalOutput)||0, ok=Number(r.ok)||0, ng=Number(r.ng)||0;
+ const achievement=target?out/target*100:0, availability=planned?operating/planned*100:0, performance=target?out/target*100:0, quality=out?ok/out*100:0, oee=availability*performance*quality/10000;
+ return {planned,down,operating,target,out,ok,ng,achievement,availability,performance,quality,oee};
+}
+function oeeNum(v){return Number(v||0).toFixed(2)}
+function openOEE(){
+ setActive('OEE & Reliability');document.getElementById('title').textContent='OEE & Reliability';document.getElementById('subtitle').textContent='Overall Equipment Effectiveness';
+ document.getElementById('cards').innerHTML=`<div class="card"><h3>Availability</h3><p id="oeeDashA">0%</p></div><div class="card"><h3>Performance</h3><p id="oeeDashP">0%</p></div><div class="card"><h3>Quality</h3><p id="oeeDashQ">0%</p></div><div class="card"><h3>OEE</h3><p id="oeeDashO">0%</p></div>`;
+ document.getElementById('content').innerHTML=`<h2>OEE & Reliability</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"><button class="primary" onclick="oeeDaily()">Daily</button><button class="gray" onclick="oeePeriod('Weekly')">Weekly</button><button class="gray" onclick="oeePeriod('Monthly')">Monthly</button><button class="gray" onclick="oeePeriod('Date-to-Date')">Date-to-Date</button></div><div id="oeeArea"></div>`;
+ oeeDaily();
+}
+function oeeDaily(){
+ const d=today();
+ document.getElementById('oeeArea').innerHTML=`<h2>Daily OEE Entry</h2><div class="oee-form">
+ <div><label>Date</label><input type="date" id="oeDate" value="${d}"></div><div><label>Line</label><select id="oeLine"><option>Line-01</option><option>Line-02</option><option>Line-03</option><option>Line-04</option><option>Line-05</option><option>Line-06</option></select></div><div><label>Model</label><input id="oeModel" placeholder="Model"></div><div><label>Work Order</label><input id="oeWO" placeholder="Work Order"></div><div><label>Runcard</label><input id="oeRun" placeholder="Runcard"></div><div><label>Planned Time (Min)</label><input type="number" min="0" id="oePlanned" oninput="calcOEEForm()"></div><div><label>Downtime (Min)</label><input type="number" min="0" id="oeDown" oninput="calcOEEForm()"></div><div><label>Operating Time</label><input id="oeOperating" readonly></div><div><label>Target</label><input type="number" min="0" id="oeTarget" oninput="calcOEEForm()"></div><div><label>OK Qty</label><input type="number" min="0" id="oeOK" oninput="calcOEEForm()"></div><div><label>NG Qty</label><input type="number" min="0" id="oeNG" oninput="calcOEEForm()"></div><div><label>Total Output</label><input id="oeTotal" readonly></div><div><label>Target vs Actual</label><input id="oeTVA" readonly></div><div><label>Achievement %</label><input id="oeAch" readonly></div><div><label>Availability %</label><input id="oeA" readonly></div><div><label>Performance %</label><input id="oeP" readonly></div><div><label>Quality %</label><input id="oeQ" readonly></div><div><label>OEE %</label><input id="oeOEE" readonly></div></div><div class="oee-actions"><button class="success" onclick="saveOEE()">Save</button><button class="dt-view" onclick="viewOEEDate()">View</button><button class="dt-excel" onclick="exportOEE()">Excel Save</button><button class="dt-clear" onclick="clearOEEForm()">Clear</button></div><div class="oee-datebar"><div><label>View Date</label><input type="date" id="oeViewDate" value="${d}"></div><button class="dt-view" onclick="viewOEEDate()">View Selected Date</button></div><div id="oeeTable"></div>`;
+ calcOEEForm();viewOEEDate();
+}
+function calcOEEForm(){const r=oeeCalc({planned:document.getElementById('oePlanned')?.value,downtime:document.getElementById('oeDown')?.value,target:document.getElementById('oeTarget')?.value,ok:document.getElementById('oeOK')?.value,ng:document.getElementById('oeNG')?.value,totalOutput:Number(document.getElementById('oeOK')?.value||0)+Number(document.getElementById('oeNG')?.value||0)});['oeOperating','oeTotal','oeTVA','oeAch','oeA','oeP','oeQ','oeOEE'].forEach(x=>{const e=document.getElementById(x);if(e)e.value=x==='oeTVA'?r.out+' / '+r.target:x==='oeOperating'?r.operating:x==='oeTotal'?r.out:x==='oeAch'?oeeNum(r.achievement)+'%':x==='oeA'?oeeNum(r.availability)+'%':x==='oeP'?oeeNum(r.performance)+'%':x==='oeQ'?oeeNum(r.quality)+'%':oeeNum(r.oee)+'%'});}
+function saveOEE(){const r={id:Date.now().toString(),date:document.getElementById('oeDate').value,line:document.getElementById('oeLine').value,model:document.getElementById('oeModel').value.trim(),wo:document.getElementById('oeWO').value.trim(),run:document.getElementById('oeRun').value.trim(),planned:Number(document.getElementById('oePlanned').value||0),downtime:Number(document.getElementById('oeDown').value||0),target:Number(document.getElementById('oeTarget').value||0),ok:Number(document.getElementById('oeOK').value||0),ng:Number(document.getElementById('oeNG').value||0)};if(!r.date||!r.line){alert('Date and Line are required.');return}r.totalOutput=r.ok+r.ng;const a=getOEERecords();a.push(r);setOEERecords(a);document.getElementById('oeViewDate').value=r.date;alert('OEE saved successfully.');viewOEEDate();}
+function viewOEEDate(){const d=document.getElementById('oeViewDate')?.value||today(),rows=getOEERecords().filter(x=>x.date===d);let h='<div class="oee-table-wrap"><table class="oee-table"><thead><tr><th>Date</th><th>Line</th><th>Model</th><th>Work Order</th><th>Runcard</th><th>Planned Time</th><th>Downtime</th><th>Operating Time</th><th>Target</th><th>Total Output</th><th>OK Qty</th><th>NG Qty</th><th>Target vs Actual</th><th>Achievement %</th><th>Availability %</th><th>Performance %</th><th>Quality %</th><th>OEE %</th><th>Delete</th></tr></thead><tbody>';if(!rows.length)h+='<tr><td colspan="19" class="dt-empty">No OEE data saved for '+d+'</td></tr>';else rows.forEach(x=>{const r=oeeCalc(x);h+=`<tr><td>${esc(x.date)}</td><td>${esc(x.line)}</td><td>${esc(x.model)}</td><td>${esc(x.wo)}</td><td>${esc(x.run)}</td><td>${r.planned}</td><td>${r.down}</td><td>${r.operating}</td><td>${r.target}</td><td>${r.out}</td><td>${r.ok}</td><td>${r.ng}</td><td>${r.out} / ${r.target}</td><td>${oeeNum(r.achievement)}%</td><td>${oeeNum(r.availability)}%</td><td>${oeeNum(r.performance)}%</td><td>${oeeNum(r.quality)}%</td><td class="oee-good">${oeeNum(r.oee)}%</td><td><button class="dt-btn dt-delete" onclick="deleteOEE('${x.id}')">Delete</button></td></tr>`});h+='</tbody></table></div>';document.getElementById('oeeTable').innerHTML=h;updateOEEDashboard(d)}
+function deleteOEE(id){if(!confirm('Delete this OEE record?'))return;setOEERecords(getOEERecords().filter(x=>x.id!==id));viewOEEDate()}
+function clearOEEForm(){['oeModel','oeWO','oeRun','oePlanned','oeDown','oeTarget','oeOK','oeNG'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});calcOEEForm()}
+function updateOEEDashboard(d){const rows=getOEERecords().filter(x=>x.date===d);let p=0,o=0,ok=0,ng=0,t=0;rows.forEach(x=>{const r=oeeCalc(x);p+=r.planned;o+=r.operating;ok+=r.ok;ng+=r.ng;t+=r.target});const out=ok+ng,a=p?p?o/p*100:0:0,perf=t?out/t*100:0,q=out?ok/out*100:0,oe=a*perf*q/10000;for(const [id,v] of [['oeeDashA',a],['oeeDashP',perf],['oeeDashQ',q],['oeeDashO',oe]]){const e=document.getElementById(id);if(e)e.textContent=oeeNum(v)+'%'}}
+function oeePeriod(type){document.getElementById('oeeArea').innerHTML=`<h2>${type} OEE View</h2><div class="oee-datebar"><div><label>Start Date</label><input type="date" id="oeStart"></div><div><label>End Date</label><input type="date" id="oeEnd"></div><button class="dt-view" onclick="viewOEEPeriod('${type}')">View</button><button class="dt-excel" onclick="exportOEEPeriod()">Excel Save</button><button class="dt-clear" onclick="document.getElementById('oeePeriodTable').innerHTML='<div class=\'dt-empty\'>Select dates and click View.</div>'">Clear View</button></div><div id="oeePeriodTable"><div class="dt-empty">Select Start Date and End Date.</div></div>`}
+function viewOEEPeriod(type){const s=document.getElementById('oeStart').value,e=document.getElementById('oeEnd').value;if(!s||!e)return alert('Select Start Date and End Date');const rows=getOEERecords().filter(x=>x.date>=s&&x.date<=e);window.currentOEEReport=rows;let h=`<h3>${type}: ${s} to ${e}</h3><div class="oee-table-wrap"><table class="oee-table"><thead><tr><th>Date</th><th>Line</th><th>Model</th><th>Work Order</th><th>Runcard</th><th>Planned</th><th>Downtime</th><th>Operating</th><th>Target</th><th>Total Output</th><th>OK</th><th>NG</th><th>Achievement %</th><th>Availability %</th><th>Performance %</th><th>Quality %</th><th>OEE %</th></tr></thead><tbody>`;if(!rows.length)h+='<tr><td colspan="17" class="dt-empty">No OEE data saved for selected dates.</td></tr>';else rows.forEach(x=>{const r=oeeCalc(x);h+=`<tr><td>${esc(x.date)}</td><td>${esc(x.line)}</td><td>${esc(x.model)}</td><td>${esc(x.wo)}</td><td>${esc(x.run)}</td><td>${r.planned}</td><td>${r.down}</td><td>${r.operating}</td><td>${r.target}</td><td>${r.out}</td><td>${r.ok}</td><td>${r.ng}</td><td>${oeeNum(r.achievement)}%</td><td>${oeeNum(r.availability)}%</td><td>${oeeNum(r.performance)}%</td><td>${oeeNum(r.quality)}%</td><td>${oeeNum(r.oee)}%</td></tr>`});h+='</tbody></table></div>';document.getElementById('oeePeriodTable').innerHTML=h}
+function exportOEE(){const d=document.getElementById('oeViewDate')?.value;exportOEERecords(getOEERecords().filter(x=>x.date===d),'SMT_OEE_'+d+'.csv')}
+function exportOEEPeriod(){exportOEERecords(window.currentOEEReport||[],'SMT_OEE_Report.csv')}
+function exportOEERecords(rows,name){if(!rows.length)return alert('No OEE data available.');const head=['Date','Line','Model','Work Order','Runcard','Planned Time','Downtime','Operating Time','Target','Total Output','OK Qty','NG Qty','Target vs Actual','Achievement %','Availability %','Performance %','Quality %','OEE %'];const data=[head,...rows.map(x=>{const r=oeeCalc(x);return[x.date,x.line,x.model,x.wo,x.run,r.planned,r.down,r.operating,r.target,r.out,r.ok,r.ng,r.out+' / '+r.target,oeeNum(r.achievement)+'%',oeeNum(r.availability)+'%',oeeNum(r.performance)+'%',oeeNum(r.quality)+'%',oeeNum(r.oee)+'%']})];const csv=data.map(a=>a.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+
+
+function getKPIRecords(){try{const a=JSON.parse(localStorage.getItem('smtKPIRecords_v1')||'[]');return a.map(x=>({...x,year:Number(x.year||new Date().getFullYear())}))}catch(e){return []}}
+function setKPIRecords(a){localStorage.setItem('smtKPIRecords_v1',JSON.stringify(a))}
+let kpiType='Production KPI';
+let kpiYear=new Date().getFullYear();
+function openKPI(){
+ setActive('KPI');document.getElementById('title').textContent='KPI';document.getElementById('subtitle').textContent='Production KPI & Equipment KPI';
+ document.getElementById('cards').innerHTML=`<div class="card"><h3>Production KPI Items</h3><p id="prodKpiCount">0</p></div><div class="card"><h3>Equipment KPI Items</h3><p id="equipKpiCount">0</p></div><div class="card"><h3>Selected KPI</h3><p id="kpiSelected">-</p></div><div class="card"><h3>Current Month</h3><p id="kpiMonth">-</p></div>`;
+ document.getElementById('content').innerHTML=`<h2>KPI</h2><div class="kpi-tabs"><button class="primary" onclick="openKPIType('Production KPI')">Production KPI</button><button class="gray" onclick="openKPIType('Equipment KPI')">Equipment KPI</button></div><div class="kpi-toolbar"><label style="font-weight:700">Year <select id="kpiYear" onchange="changeKPIYear(this.value)"></select></label></div><div id="kpiArea"></div>`;
+ const ys=document.getElementById('kpiYear');for(let y=new Date().getFullYear()-5;y<=new Date().getFullYear()+5;y++)ys.insertAdjacentHTML('beforeend',`<option value="${y}">${y}</option>`);ys.value=kpiYear;
+ openKPIType('Production KPI');
+}
+function changeKPIYear(y){kpiYear=Number(y);openKPIType(kpiType)}
+function openKPIType(type){kpiType=type;const ys=document.getElementById('kpiYear');if(ys)ys.value=kpiYear;document.getElementById('kpiArea').innerHTML=`<h2>${type}</h2><div class="kpi-toolbar"><button class="success" onclick="addKPIItem()">+ Add Item</button><button class="primary" onclick="saveKPI()">Save</button><button class="kpi-excel" onclick="exportKPI()">Excel Save</button><button class="gray" onclick="refreshKPI()">Refresh</button></div><p class="small">Year ${kpiYear} KPI data. Select a year to view or update only that year's data.</p><div class="kpi-table-wrap"><table class="kpi-table"><thead><tr><th>Items</th><th>Target</th><th>Jan</th><th>Feb</th><th>March</th><th>April</th><th>May</th><th>June</th><th>July</th><th>August</th><th>September</th><th>October</th><th>November</th><th>December</th><th>Delete</th></tr></thead><tbody id="kpiBody"></tbody></table></div>`;renderKPI()}
+function renderKPI(){const rows=getKPIRecords().filter(x=>x.type===kpiType&&Number(x.year||new Date().getFullYear())===kpiYear),body=document.getElementById('kpiBody');if(!body)return;const ms=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];body.innerHTML=rows.length?rows.map(r=>`<tr data-id="${esc(r.id)}"><td><input class="kpi-item" value="${esc(r.item)}" placeholder="KPI Item"></td><td><input class="kpi-val kpi-target" type="number" step="any" value="${esc(r.target||'')}"></td>${ms.map(m=>`<td><input class="kpi-val kpi-${m}" type="number" step="any" value="${esc(r[m]||'')}"></td>`).join('')}<td><button class="dt-btn dt-delete" onclick="deleteKPI('${esc(r.id)}')">Delete</button></td></tr>`).join(''):`<tr><td colspan="15" class="dt-empty">No ${esc(kpiType)} items. Click + Add Item.</td></tr>`;updateKPICards()}
+function addKPIItem(){const a=getKPIRecords();a.push({id:Date.now().toString(),year:kpiYear,type:kpiType,item:'New KPI',target:'',jan:'',feb:'',mar:'',apr:'',may:'',jun:'',jul:'',aug:'',sep:'',oct:'',nov:'',dec:''});setKPIRecords(a);renderKPI();const inputs=document.querySelectorAll('#kpiBody .kpi-item');if(inputs.length){inputs[inputs.length-1].focus();inputs[inputs.length-1].select()}}
+function collectKPI(){const ms=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];return [...document.querySelectorAll('#kpiBody tr[data-id]')].map(tr=>{const r={id:tr.dataset.id,year:kpiYear,type:kpiType,item:tr.querySelector('.kpi-item').value.trim(),target:tr.querySelector('.kpi-target').value};ms.forEach(m=>r[m]=tr.querySelector('.kpi-'+m).value);return r})}
+function saveKPI(){const current=collectKPI().filter(x=>x.item);if(!current.length)return alert('Add at least one KPI item.');let all=getKPIRecords().filter(x=>!(x.type===kpiType&&Number(x.year||new Date().getFullYear())===kpiYear));setKPIRecords(all.concat(current));renderKPI();alert(kpiType+' saved successfully.')}
+function deleteKPI(id){if(!confirm('Delete this KPI item?'))return;setKPIRecords(getKPIRecords().filter(x=>x.id!==id));renderKPI()}
+function refreshKPI(){renderKPI()}
+function updateKPICards(){const all=getKPIRecords().filter(x=>Number(x.year||new Date().getFullYear())===kpiYear),p=all.filter(x=>x.type==='Production KPI').length,e=all.filter(x=>x.type==='Equipment KPI').length,a=document.getElementById('prodKpiCount'),b=document.getElementById('equipKpiCount'),c=document.getElementById('kpiSelected'),m=document.getElementById('kpiMonth');if(a)a.textContent=p;if(b)b.textContent=e;if(c)c.textContent=kpiType;if(m)m.textContent=new Date().toLocaleString('en',{month:'long'})}
+function exportKPI(){const rows=collectKPI().filter(x=>x.item);if(!rows.length)return alert('No KPI data available.');const head=['KPI Type','Items','Target','Jan','Feb','March','April','May','June','July','August','September','October','November','December'];const csv=[head,...rows.map(r=>[r.type,r.item,r.target,r.jan,r.feb,r.mar,r.apr,r.may,r.jun,r.jul,r.aug,r.sep,r.oct,r.nov,r.dec])].map(a=>a.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=kpiType.replace(/\s+/g,'_')+'_KPI.csv';a.click();URL.revokeObjectURL(url)}
+
+function getDowntimeRecords(){try{return JSON.parse(localStorage.getItem('smtDowntimeRecords_v1')||'[]')}catch(e){return []}}
+function setDowntimeRecords(a){localStorage.setItem('smtDowntimeRecords_v1',JSON.stringify(a))}
+function calcDownMinutes(){
+ const s=document.getElementById('dtStart').value, e=document.getElementById('dtEnd').value;
+ if(!s||!e){document.getElementById('dtMinutes').value='';return}
+ let a=new Date('1970-01-01T'+s), b=new Date('1970-01-01T'+e);
+ if(b<a)b.setDate(b.getDate()+1);
+ document.getElementById('dtMinutes').value=Math.round((b-a)/60000);
+}
+function openDowntime(){
+ setActive('Downtime');document.getElementById('title').textContent='Downtime';document.getElementById('subtitle').textContent='Downtime Management';
+ const today=new Date().toISOString().slice(0,10);
+ document.getElementById('content').innerHTML=`
+ <h2>Downtime Management</h2>
+ <div class="dt-form">
+  <div><label>Date</label><input type="date" id="dtDate" value="${today}"></div>
+  <div><label>Time</label><input type="time" id="dtTime"></div>
+  <div><label>Line</label><select id="dtLine"><option>Line-01</option><option>Line-02</option><option>Line-03</option><option>Line-04</option><option>Line-05</option><option>Line-06</option></select></div>
+  <div><label>Model</label><input id="dtModel" placeholder="Model"></div>
+  <div><label>Stage</label><input id="dtStage" placeholder="Stage"></div>
+  <div><label>Department</label><input id="dtDepartment" placeholder="Department"></div>
+  <div><label>Start Time</label><input type="time" id="dtStart" onchange="calcDownMinutes()"></div>
+  <div><label>End Time</label><input type="time" id="dtEnd" onchange="calcDownMinutes()"></div>
+  <div><label>Minutes (Automatic)</label><input id="dtMinutes" readonly class="dt-min"></div>
+  <div><label>Owner</label><input id="dtOwner" placeholder="Owner"></div>
+  <div><label>Status</label><select id="dtStatus"><option>Open</option><option>In Progress</option><option>Closed</option><option>Monitoring</option></select></div>
+  <div class="full"><label>Problem</label><textarea id="dtProblem" placeholder="Problem"></textarea></div>
+  <div class="full"><label>Root Cause</label><textarea id="dtRoot" placeholder="Root Cause"></textarea></div>
+  <div class="full"><label>Corrective Action</label><textarea id="dtCorrective" placeholder="Corrective Action"></textarea></div>
+  <div class="full"><label>Preventive Action</label><textarea id="dtPreventive" placeholder="Preventive Action"></textarea></div>
+ </div>
+ <div class="dt-actions">
+  <button class="dt-btn dt-save" onclick="saveDowntime()">Save</button>
+  <button class="dt-btn dt-view" onclick="viewDowntime()">View</button>
+  <button class="dt-btn dt-excel" onclick="exportDowntime()">Excel Save</button>
+  <button class="dt-btn dt-clear" onclick="clearDowntimeForm()">Clear</button>
+ </div>
+ <div class="dt-datebar"><div><label>View Date</label><input type="date" id="dtViewDate" value="${today}"></div><button class="dt-btn dt-view" onclick="viewDowntime()">View Selected Date</button></div>
+ <div id="downtimeTable"></div>`;
+ viewDowntime();
+}
+function saveDowntime(){
+ const r={id:Date.now().toString(),date:document.getElementById('dtDate').value,time:document.getElementById('dtTime').value,line:document.getElementById('dtLine').value,model:document.getElementById('dtModel').value.trim(),stage:document.getElementById('dtStage').value.trim(),department:document.getElementById('dtDepartment').value.trim(),start:document.getElementById('dtStart').value,end:document.getElementById('dtEnd').value,minutes:Number(document.getElementById('dtMinutes').value||0),problem:document.getElementById('dtProblem').value.trim(),root:document.getElementById('dtRoot').value.trim(),corrective:document.getElementById('dtCorrective').value.trim(),preventive:document.getElementById('dtPreventive').value.trim(),owner:document.getElementById('dtOwner').value.trim(),status:document.getElementById('dtStatus').value};
+ if(!r.date||!r.start||!r.end){alert('Date, Start Time and End Time are required.');return}
+ const a=getDowntimeRecords();a.push(r);setDowntimeRecords(a);document.getElementById('dtViewDate').value=r.date;alert('Downtime saved successfully.');viewDowntime();clearDowntimeForm(false);
+}
+function viewDowntime(){
+ const d=document.getElementById('dtViewDate')?.value||document.getElementById('dtDate')?.value; if(!d)return;
+ const rows=getDowntimeRecords().filter(x=>x.date===d).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+ let h='<div class="dt-table-wrap"><table class="dt-table"><thead><tr><th>Date</th><th>Time</th><th>Line</th><th>Model</th><th>Stage</th><th>Department</th><th>Start Time</th><th>End Time</th><th>Minutes</th><th>Problem</th><th>Root Cause</th><th>Corrective Action</th><th>Preventive Action</th><th>Owner</th><th>Status</th><th>Delete</th></tr></thead><tbody>';
+ if(!rows.length){h+='<tr><td colspan="16" class="dt-empty">No downtime data saved for '+d+'</td></tr>'} else rows.forEach(r=>{h+=`<tr><td>${esc(r.date)}</td><td>${esc(r.time)}</td><td>${esc(r.line)}</td><td>${esc(r.model)}</td><td>${esc(r.stage)}</td><td>${esc(r.department)}</td><td>${esc(r.start)}</td><td>${esc(r.end)}</td><td class="dt-min">${r.minutes}</td><td>${esc(r.problem)}</td><td>${esc(r.root)}</td><td>${esc(r.corrective)}</td><td>${esc(r.preventive)}</td><td>${esc(r.owner)}</td><td>${esc(r.status)}</td><td><button class="dt-btn dt-delete" onclick="deleteDowntime('${r.id}')">Delete</button></td></tr>`});
+ h+='</tbody></table></div>';document.getElementById('downtimeTable').innerHTML=h;
+}
+function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function deleteDowntime(id){if(!confirm('Delete this downtime record?'))return;setDowntimeRecords(getDowntimeRecords().filter(x=>x.id!==id));viewDowntime()}
+function clearDowntimeForm(show=true){['dtTime','dtModel','dtStage','dtDepartment','dtStart','dtEnd','dtMinutes','dtProblem','dtRoot','dtCorrective','dtPreventive','dtOwner'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});if(show)document.getElementById('dtStatus').value='Open'}
+function exportDowntime(){
+ const d=document.getElementById('dtViewDate')?.value;const rows=getDowntimeRecords().filter(x=>x.date===d);if(!rows.length){alert('No data available for selected date.');return}
+ const head=['Date','Time','Line','Model','Stage','Department','Start Time','End Time','Minutes','Problem','Root Cause','Corrective Action','Preventive Action','Owner','Status'];
+ const csv=[head,...rows.map(r=>[r.date,r.time,r.line,r.model,r.stage,r.department,r.start,r.end,r.minutes,r.problem,r.root,r.corrective,r.preventive,r.owner,r.status])].map(a=>a.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='SMT_Downtime_'+d+'.csv';a.click();URL.revokeObjectURL(url);
+}
+showDashboard();
+
+const PM_KEY='smtPMRecords_v1', PM_EQ_KEY='smtPMEquipment_v1';
+let pmYear=new Date().getFullYear(), pmMonth=new Date().getMonth(), pmEditId='';
+function getPMRecords(){try{return JSON.parse(localStorage.getItem(PM_KEY)||'[]')}catch(e){return []}}
+function setPMRecords(a){localStorage.setItem(PM_KEY,JSON.stringify(a))}
+function getPMEquipment(){try{return JSON.parse(localStorage.getItem(PM_EQ_KEY)||'[]')}catch(e){return []}}
+function setPMEquipment(a){localStorage.setItem(PM_EQ_KEY,JSON.stringify(a))}
+function pmDate(d){if(!d)return '';const x=new Date(d+'T00:00:00');return isNaN(x)?'':x.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
+function pmNextDate(base,freq){if(!base)return '';const d=new Date(base+'T00:00:00');if(isNaN(d))return '';const n={Daily:1,Weekly:7,Monthly:1,Quarterly:3,'Half-yearly':6,Yearly:12}[freq]||0;if(freq==='Daily'||freq==='Weekly'){d.setDate(d.getDate()+n)}else if(n){d.setMonth(d.getMonth()+n)}return d.toISOString().slice(0,10)}
+function pmStatus(r){const today=new Date();today.setHours(0,0,0,0);if(r.actual)return 'Completed';const p=r.planned?new Date(r.planned+'T00:00:00'):null;if(!p)return 'Pending';if(p<today)return 'Overdue';if(p.getTime()===today.getTime())return 'Due';return 'Pending'}
+function openPMSchedule(){
+ setActive('PM Schedule');document.getElementById('title').textContent='PM Schedule';document.getElementById('subtitle').textContent='Preventive Maintenance Planning & Compliance';
+ document.getElementById('cards').innerHTML='';
+ const now=new Date();pmYear=pmYear||now.getFullYear();pmMonth=pmMonth??now.getMonth();
+ document.getElementById('content').innerHTML=`<h2>🔧 PM Schedule</h2>
+ <div class="pm-toolbar"><div class="pm-field"><label>Year</label><select id="pmYear" onchange="pmYear=Number(this.value);renderPM()"></select></div><div class="pm-field"><label>Month</label><select id="pmMonth" onchange="pmMonth=Number(this.value);renderPM()"></select></div><button class="pm-btn pm-blue" onclick="renderPM()">View</button><button class="pm-btn pm-gray" onclick="resetPMForm()">🔄 Refresh</button></div>
+ <div class="pm-actions"><button class="pm-btn pm-blue" onclick="addPMEquipment()">➕ Add Equipment</button><button class="pm-btn pm-green" onclick="savePM()">➕ Add PM</button><button class="pm-btn pm-orange" onclick="editPMSelected()">✏️ Edit</button><button class="pm-btn pm-red" onclick="deletePMSelected()">🗑️ Delete</button><button class="pm-btn pm-gray" onclick="showPMChecklist()">📋 Checklist</button><button class="pm-btn pm-green" onclick="exportPM()">📊 Excel View</button></div>
+ <div id="pmForm"></div><div id="pmKpis"></div><h3>📅 Monthly PM View</h3><div id="pmCalendar"></div><h3>PM Schedule List</h3><div id="pmList"></div>`;
+ const ys=document.getElementById('pmYear');for(let y=now.getFullYear()-5;y<=now.getFullYear()+5;y++)ys.insertAdjacentHTML('beforeend',`<option value="${y}" ${y===pmYear?'selected':''}>${y}</option>`);const ms=['January','February','March','April','May','June','July','August','September','October','November','December'];const mm=document.getElementById('pmMonth');ms.forEach((m,i)=>mm.insertAdjacentHTML('beforeend',`<option value="${i}" ${i===pmMonth?'selected':''}>${m}</option>`));renderPMForm();renderPM();
+}
+function renderPMForm(r={}){const eq=getPMEquipment();document.getElementById('pmForm').innerHTML=`<h3>PM Entry</h3><div class="pm-form"><div class="pm-field"><label>Equipment</label><select id="pmEquipment">${eq.map(x=>`<option value="${esc(x.name)}" data-eqid="${esc(x.id)}" data-type="${esc(x.type)}">${esc(x.name)}${x.id?' - '+esc(x.id):''}</option>`).join('')||'<option value="">Add Equipment first</option>'}</select></div><div class="pm-field"><label>Equipment Name</label><input id="pmEqName" value="${esc(r.eqName||'')}" placeholder="Equipment Name"></div><div class="pm-field"><label>Equipment ID</label><input id="pmEqId" value="${esc(r.eqId||'')}" placeholder="Equipment ID"></div><div class="pm-field"><label>Line</label><select id="pmLine">${['L1','L2','L3','L4','L5','L6'].map(x=>`<option ${x===(r.line||'L1')?'selected':''}>${x}</option>`).join('')}</select></div><div class="pm-field"><label>Machine Type</label><input id="pmMachineType" value="${esc(r.machineType||'')}" placeholder="Mounter / SPI / AOI"></div><div class="pm-field"><label>PM Frequency</label><select id="pmFrequency" onchange="autoPMNext()">${['Daily','Weekly','Monthly','Quarterly','Half-yearly','Yearly'].map(x=>`<option ${x===(r.frequency||'Monthly')?'selected':''}>${x}</option>`).join('')}</select></div><div class="pm-field"><label>Last PM Date</label><input type="date" id="pmLast" value="${r.last||''}" onchange="autoPMNext()"></div><div class="pm-field"><label>Planned Date</label><input type="date" id="pmPlanned" value="${r.planned||''}" onchange="autoPMNext()"></div><div class="pm-field"><label>Next PM Date</label><input type="date" id="pmNext" value="${r.next||''}" readonly></div><div class="pm-field"><label>Actual Completion Date</label><input type="date" id="pmActual" value="${r.actual||''}"></div><div class="pm-field"><label>Responsible Engineer</label><input id="pmEngineer" value="${esc(r.engineer||'')}" placeholder="Engineer"></div><div class="pm-field full"><label>PM Details / Activity</label><textarea id="pmDetails" placeholder="Head cleaning & inspection">${esc(r.details||'')}</textarea></div><div class="pm-field full"><label>PM Checklist</label><textarea id="pmChecklist" placeholder="Cleaning, inspection, lubrication, calibration, safety check...">${esc(r.checklist||'')}</textarea></div><div class="pm-field full"><label>Remarks</label><textarea id="pmRemarks" placeholder="Remarks">${esc(r.remarks||'')}</textarea></div></div>`;autoPMNext()}
+function autoPMNext(){const p=document.getElementById('pmPlanned')?.value||document.getElementById('pmLast')?.value,f=document.getElementById('pmFrequency')?.value;if(document.getElementById('pmNext'))document.getElementById('pmNext').value=pmNextDate(p,f)}
+function savePM(){const eq=document.getElementById('pmEquipment');const selected=eq?.selectedOptions?.[0];const r={id:pmEditId||Date.now().toString(),equipment:eq?.value||'',eqName:document.getElementById('pmEqName').value.trim(),eqId:document.getElementById('pmEqId').value.trim(),line:document.getElementById('pmLine').value,machineType:document.getElementById('pmMachineType').value.trim(),frequency:document.getElementById('pmFrequency').value,details:document.getElementById('pmDetails').value.trim(),checklist:document.getElementById('pmChecklist').value.trim(),last:document.getElementById('pmLast').value,planned:document.getElementById('pmPlanned').value,next:document.getElementById('pmNext').value,actual:document.getElementById('pmActual').value,engineer:document.getElementById('pmEngineer').value.trim(),remarks:document.getElementById('pmRemarks').value.trim()};if(!r.eqName&&!r.equipment){alert('Equipment Name is required.');return}if(!r.planned){alert('Planned Date is required.');return}let a=getPMRecords();const i=a.findIndex(x=>x.id===r.id);if(i>=0)a[i]=r;else a.push(r);setPMRecords(a);pmEditId='';alert('PM saved successfully.');renderPMForm();renderPM()}
+function renderPM(){const rows=getPMRecords().filter(r=>{const d=r.planned||r.next||r.last;return d&&Number(d.slice(0,4))===pmYear&&Number(d.slice(5,7))-1===pmMonth});renderPMKPI(rows);renderPMCalendar(rows);renderPMList(rows)}
+function renderPMKPI(rows){const all=getPMRecords();const planned=rows.length,completed=rows.filter(r=>r.actual).length,pending=rows.filter(r=>pmStatus(r)==='Pending').length,over=rows.filter(r=>pmStatus(r)==='Overdue').length,comp=planned?completed/planned*100:0;document.getElementById('pmKpis').innerHTML=`<div class="pm-kpis"><div class="pm-kpi">PM Planned<b>${planned}</b></div><div class="pm-kpi">PM Completed<b>${completed}</b></div><div class="pm-kpi">PM Pending<b>${pending}</b></div><div class="pm-kpi">PM Overdue<b>${over}</b></div><div class="pm-kpi">PM Compliance %<b>${comp.toFixed(1)}%</b></div><div class="pm-kpi">Equipment PM %<b>${all.length?((all.filter(r=>r.actual).length/all.length)*100).toFixed(1):'0.0'}%</b></div></div>`}
+function renderPMCalendar(rows){const days=new Date(pmYear,pmMonth+1,0).getDate();const eqs=[...new Map(rows.map(r=>[(r.eqName||r.equipment||r.eqId),r])).values()];let h='<div class="pm-cal-wrap"><table class="pm-calendar"><thead><tr><th>Equipment</th>';for(let d=1;d<=days;d++)h+=`<th>${d}</th>`;h+='</tr></thead><tbody>';if(!eqs.length)h+=`<tr><td colspan="${days+1}" class="pm-empty">No PM planned for this month.</td></tr>`;else eqs.forEach(e=>{h+=`<tr><td class="pm-cal-eq">${esc(e.eqName||e.equipment||e.eqId)}</td>`;for(let d=1;d<=days;d++){const date=`${pmYear}-${String(pmMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const rs=rows.filter(r=>(r.eqName||r.equipment||r.eqId)===(e.eqName||e.equipment||e.eqId)&&r.planned===date);h+=`<td class="pm-day">${rs.map(r=>r.actual?'<span class="pm-check">✓</span>':'<span class="pm-due">PM</span>').join('')}</td>`}h+='</tr>'});h+='</tbody></table></div>';document.getElementById('pmCalendar').innerHTML=h}
+function renderPMList(rows){let h='<div class="pm-table-wrap"><table class="pm-table"><thead><tr><th>Select</th><th>Equipment</th><th>Equipment ID</th><th>Line</th><th>Machine Type</th><th>PM Type</th><th>Frequency</th><th>PM Activity</th><th>Planned Date</th><th>Last PM</th><th>Next PM</th><th>Actual Completion</th><th>Status</th><th>Responsible</th><th>Remarks</th></tr></thead><tbody>';if(!rows.length)h+='<tr><td colspan="15" class="pm-empty">No PM records for selected month.</td></tr>';else rows.forEach(r=>{const st=pmStatus(r);h+=`<tr><td><input type="radio" name="pmSel" value="${esc(r.id)}"></td><td>${esc(r.eqName||r.equipment)}</td><td>${esc(r.eqId)}</td><td>${esc(r.line)}</td><td>${esc(r.machineType)}</td><td>Preventive</td><td>${esc(r.frequency)}</td><td>${esc(r.details)}</td><td>${pmDate(r.planned)}</td><td>${pmDate(r.last)}</td><td>${pmDate(r.next)}</td><td>${pmDate(r.actual)}</td><td class="pm-status">${st}</td><td>${esc(r.engineer)}</td><td>${esc(r.remarks)}</td></tr>`});h+='</tbody></table></div>';document.getElementById('pmList').innerHTML=h}
+function selectedPM(){const x=document.querySelector('input[name="pmSel"]:checked');return x?.value||''}
+function editPMSelected(){const id=selectedPM();if(!id){alert('Select a PM record first.');return}const r=getPMRecords().find(x=>x.id===id);if(!r)return;pmEditId=id;renderPMForm(r);window.scrollTo({top:0,behavior:'smooth'})}
+function deletePMSelected(){const id=selectedPM();if(!id){alert('Select a PM record first.');return}if(!confirm('Delete selected PM record?'))return;setPMRecords(getPMRecords().filter(x=>x.id!==id));renderPM()}
+function addPMEquipment(){const name=prompt('Equipment Name (example: Fuji NXT)');if(!name)return;const id=prompt('Equipment ID');const line=prompt('Line (example: L1)','L1')||'';const type=prompt('Machine Type','Mounter')||'';const a=getPMEquipment();a.push({id:id||'',name:name.trim(),line,type});setPMEquipment(a);renderPMForm();alert('Equipment added successfully.')}
+function showPMChecklist(){const id=selectedPM();if(!id){alert('Select a PM record first.');return}const r=getPMRecords().find(x=>x.id===id);alert('PM Checklist:\n\n'+(r?.checklist||'No checklist entered.'))}
+function resetPMForm(){pmEditId='';renderPMForm();renderPM()}
+function exportPM(){const rows=getPMRecords().filter(r=>{const d=r.planned||r.next||r.last;return d&&Number(d.slice(0,4))===pmYear&&Number(d.slice(5,7))-1===pmMonth});if(!rows.length){alert('No PM data available for selected month.');return}const head=['Year','Month','Equipment','Equipment ID','Line','Machine Type','PM Type','Frequency','PM Activity','Planned Date','Last PM','Next PM','Actual Completion Date','Status','Responsible Engineer','Remarks'];const data=[head,...rows.map(r=>[pmYear,new Date(pmYear,pmMonth).toLocaleString('en',{month:'long'}),r.eqName||r.equipment,r.eqId,r.line,r.machineType,'Preventive',r.frequency,r.details,r.planned,r.last,r.next,r.actual,pmStatus(r),r.engineer,r.remarks])];const csv=data.map(a=>a.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`PM_Schedule_${pmYear}_${String(pmMonth+1).padStart(2,'0')}.csv`;a.click();URL.revokeObjectURL(url)}
+
+</script>
+
+<style>
+#pwaInstall{position:fixed;right:18px;bottom:18px;z-index:9999;background:#2563eb;color:white;border:0;border-radius:12px;padding:12px 18px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.2);display:none;cursor:pointer}
+.pwa-note{font-size:12px;color:#64748b;margin-top:6px}
+</style>
+<button id="pwaInstall">📱 Install SMT App</button>
+<script>
+(function(){
+ let deferredPrompt=null;
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('pwaInstall');if(b)b.style.display='block';});
+ document.getElementById('pwaInstall').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('pwaInstall').style.display='none';});
+ window.addEventListener('appinstalled',()=>{document.getElementById('pwaInstall').style.display='none';});
+ // Keep all existing localStorage data; add backup/restore helpers.
+ window.backupAllSMTData=function(){
+   const data={}; for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);data[k]=localStorage.getItem(k);}
+   const blob=new Blob([JSON.stringify({app:'SMT Production Management System',version:1,created:new Date().toISOString(),data},null,2)],{type:'application/json'});
+   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SMT_PMS_Backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);
+ };
+ window.restoreSMTData=function(file){
+   const r=new FileReader();r.onload=function(){try{const x=JSON.parse(r.result);if(!x.data)throw Error('Invalid backup');Object.keys(x.data).forEach(k=>localStorage.setItem(k,x.data[k]));alert('Backup restored successfully. System will refresh.');location.reload();}catch(e){alert('Invalid backup file.')}};r.readAsText(file);
+ };
+ // Register service worker when served from http/https.
+ if('serviceWorker' in navigator && location.protocol!=='file:'){navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}
+})();
+</script>
+<script>
+(function(){
+ const oldOpenSettings=window.openSettings;
+ window.openSettings=function(){
+   if(typeof oldOpenSettings==='function') oldOpenSettings();
+   setTimeout(()=>{
+     const page=document.getElementById('content'); if(!page)return;
+     if(document.getElementById('smtBackupPanel'))return;
+     const d=document.createElement('div');d.id='smtBackupPanel';d.style='margin-top:20px;padding:18px;border:1px solid #dbeafe;border-radius:14px;background:#f8fbff';
+     d.innerHTML='<h3>💾 Data Backup & Restore</h3><p class="pwa-note">All Production, Downtime, OEE, KPI and PM data is stored in this browser. Backup regularly to keep a copy.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="pm-btn pm-blue" onclick="backupAllSMTData()">⬇ Backup All Data</button><label class="pm-btn pm-green" style="cursor:pointer">⬆ Restore Data<input type="file" accept="application/json" style="display:none" onchange="restoreSMTData(this.files[0])"></label></div>';
+     page.appendChild(d);
+   },100);
+ };
+})();
+</script></body>
+</html>
